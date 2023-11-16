@@ -6,11 +6,11 @@ export interface Product {
   options: string;
 }
 
-export interface requestProduct {
-  name: string;
-  price: number;
-  category: string;
-  description: string;
-  options: string[];
+export interface requestProduct extends Product {
+  url: string;
+}
+
+export interface responseProduct extends Product {
+  ProductId: string;
   url: string;
 }

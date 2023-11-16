@@ -31,12 +31,6 @@ export const login = () =>
 
 export const logout = () => signOut(auth).catch((error) => console.log(error));
 
-export const onUserStateChange = (callback: (user: UserType | null) => void) =>
-  onAuthStateChanged(auth, async (user: User | null) => {
-    const updateUser = user ? await admimUser(user) : null;
-    callback(updateUser);
-  });
-
 const admimUser = async (user: User) => {
   const dbRef = ref(database);
   return get(child(dbRef, `admins`)).then((snapshot) => {
@@ -49,6 +43,12 @@ const admimUser = async (user: User) => {
   });
 };
 
+export const onUserStateChange = (callback: (user: UserType | null) => void) =>
+  onAuthStateChanged(auth, async (user: User | null) => {
+    const updateUser = user ? await admimUser(user) : null;
+    callback(updateUser);
+  });
+
 export const addNewProduct = async (product: Product, url: string) => {
   const productId = uuidv4();
   return set(ref(database, `products/${productId}`), {
@@ -58,4 +58,21 @@ export const addNewProduct = async (product: Product, url: string) => {
     url,
     options: product.options.split(", "),
   });
+};
+
+export const getProducts = async () => {
+  const dbRef = ref(database);
+  console.log("1");
+  return get(child(dbRef, `products`))
+    .then((snapshot) => {
+      if (snapshot.exists()) {
+        console.log(Object.values(snapshot.val()));
+        return Object.values(snapshot.val()); // 배열안에 value들만 가져오기 위해 Object.values 사용
+      } else {
+        return [];
+      }
+    })
+    .catch((error) => {
+      console.error(error);
+    });
 };
