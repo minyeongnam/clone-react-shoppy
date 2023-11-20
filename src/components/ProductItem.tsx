@@ -1,12 +1,12 @@
 import { Link } from "react-router-dom";
-import { responseProduct } from "../type/product";
+import { ResponseProduct } from "../type/product";
 
 interface ProductItemProps {
-  product: responseProduct;
+  product: ResponseProduct;
 }
 
 export default function ProductItem({
-  product: { ProductId, url, name, price },
+  product: { url, name, price, category },
 }: ProductItemProps) {
   return (
     <li className="products__item">
@@ -17,7 +17,7 @@ export default function ProductItem({
         <div className="item__info">
           <div className="item__title">{name}</div>
           <div className="item__price">{price}</div>
-          <div className="item__cate"></div>
+          <div className="item__cate">{category}</div>
         </div>
       </Link>
     </li>

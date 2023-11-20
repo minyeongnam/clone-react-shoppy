@@ -10,8 +10,8 @@ import {
 } from "firebase/auth";
 import { child, get, getDatabase, ref, set } from "firebase/database";
 import { UserType } from "../type/user";
-import { Product } from "../type/product";
-import { v4 as uuidv4 } from "uuid";
+import { Product, ResponseProduct } from "../type/product";
+import { v4 as uuidV4 } from "uuid";
 
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_FIREBASE_APIKEY,
@@ -31,26 +31,28 @@ export const login = () =>
 
 export const logout = () => signOut(auth).catch((error) => console.log(error));
 
-const admimUser = async (user: User) => {
+const adminUser = async (user: User): Promise<UserType> => {
   const dbRef = ref(database);
-  return get(child(dbRef, `admins`)).then((snapshot) => {
-    if (snapshot.exists()) {
-      const admins = snapshot.val();
-      const isAdmin = user.uid.includes(admins);
-      return { ...user, isAdmin };
-    }
-    return { ...user, isAdmin: false };
-  });
+  return get(child(dbRef, `admins`))
+    .then((snapshot) => {
+      if (snapshot.exists()) {
+        const admins = snapshot.val();
+        const isAdmin = user.uid.includes(admins);
+        return { ...user, isAdmin };
+      }
+      return { ...user, isAdmin: false };
+    })
+    .catch((error) => error);
 };
 
 export const onUserStateChange = (callback: (user: UserType | null) => void) =>
   onAuthStateChanged(auth, async (user: User | null) => {
-    const updateUser = user ? await admimUser(user) : null;
+    const updateUser = user ? await adminUser(user) : null;
     callback(updateUser);
   });
 
 export const addNewProduct = async (product: Product, url: string) => {
-  const productId = uuidv4();
+  const productId = uuidV4();
   return set(ref(database, `products/${productId}`), {
     ...product,
     productId,
@@ -60,19 +62,13 @@ export const addNewProduct = async (product: Product, url: string) => {
   });
 };
 
-export const getProducts = async () => {
+export const getProducts = async (): Promise<ResponseProduct[]> => {
   const dbRef = ref(database);
-  console.log("1");
   return get(child(dbRef, `products`))
     .then((snapshot) => {
       if (snapshot.exists()) {
-        console.log(Object.values(snapshot.val()));
         return Object.values(snapshot.val()); // 배열안에 value들만 가져오기 위해 Object.values 사용
-      } else {
-        return [];
       }
     })
-    .catch((error) => {
-      console.error(error);
-    });
+    .catch((error) => error);
 };
